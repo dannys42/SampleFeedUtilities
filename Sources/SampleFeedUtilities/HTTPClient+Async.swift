@@ -50,58 +50,73 @@ public extension SampleHTTPClient {
     ///   - body: JSON data to send
     ///   - timeout: Optional timeout
     @discardableResult
-    func async(method: HTTPMethod,
+    func asyncRaw(method: HTTPMethod,
                      url: URL,
                      headers: HttpHeaders=[:],
                      body: KeyedData? = nil,
-                     completion: @escaping (AsyncKeyedResponse)->Void) -> URLSessionDataTask? {
+                     completion: @escaping (AsyncRawResponse)->Void) -> URLSessionDataTask? {
         
         var req = URLRequest(url: url)
         req.httpMethod = method.description
         
         // Setup HTTP Headers
-        for (key,value) in self.defaultHeaders {
-            req.addValue(value, forHTTPHeaderField: key)
-        }
-        for (key,value) in headers {
-            req.addValue(value, forHTTPHeaderField: key)
-        }
-        
+        req.addHTTPHeaders(headers: self.defaultHeaders, headers)
+
         // Setup body of HTTP message
-        // Pretty printing for debug.  (Should be removed in production for performance)
         if let body = body {
             do {
-                let jsonData = try JSONSerialization.data(withJSONObject: body,
-                                                  options: .prettyPrinted)
-                req.httpBody = jsonData
+                try req.setJSONBody(keyedData: body)
             } catch {
                 completion(.failure(error))
                 return nil
             }
         }
-        
+
         // Perform the HTTP request
         let task = self.async(request: req) { (response) in
             switch response {
             case .failure(let error):
                 completion(.failure(error))
             case .success(let httpResponse, let data):
-                // Convert the data to an object
-                do {
-                    let returnData = try JSONSerialization.jsonObject(with: data,
-                                                              options: [])
-                    guard let returnDict = returnData as? [String : Any] else {
-                        completion(.failure(Failures.cannotDecodeData))
-                        return
-                    }
-                    
-                    completion(.success(httpResponse, returnDict))
-                } catch {
-                    completion(.failure(error))
-                    return
-                }
+                completion(.success(httpResponse, data))
             }
         }
         return task
     }
+    
+    /// Make an asynchronous HTTP call with input/output dictionaries
+    /// - Parameters:
+    ///   - url: URL to connect to
+    ///   - headers: Optional header fields to include
+    ///   - body: JSON data to send
+    ///   - timeout: Optional timeout
+    @discardableResult
+    func async(method: HTTPMethod,
+                     url: URL,
+                     headers: HttpHeaders=[:],
+                     body: KeyedData? = nil,
+                     completion: @escaping (AsyncKeyedResponse)->Void) -> URLSessionDataTask? {
+        
+        let task = asyncRaw(method: method,
+                         url: url,
+                         headers: headers,
+                         body: body) { rawResponse in
+                            switch rawResponse {
+                            case .failure(let error):
+                                completion( .failure(error) )
+                            case .success(let httpResponse, let data):
+                                // Convert the data to an object
+                                do {
+                                    let returnDict = try data.asKeyedData()
+                                    completion(.success(httpResponse, returnDict))
+                                } catch {
+                                    completion(.failure(error))
+                                    return
+                                }
+                            }
+        }
+
+        return task
+    }
+
 }

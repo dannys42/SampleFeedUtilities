@@ -49,7 +49,51 @@ public extension SampleHTTPClient {
         }
 }
 
-// MARK: - Asynchronous Methods
+// MARK: - Asynchronous Raw Methods
+public extension SampleHTTPClient {
+    func getRaw(_ endPoint: String, headers: HttpHeaders=[:],
+             completion: @escaping (AsyncRawResponse)->Void) {
+        let url = self.baseUrl.appendingPathComponent(endPoint)
+        
+        self.asyncRaw(method: .get,
+                          url: url,
+                      headers: headers,
+                         body: nil,
+                   completion: completion)
+        }
+    func deleteRaw(_ endPoint: String, headers: HttpHeaders=[:],
+                completion: @escaping (AsyncRawResponse)->Void) {
+        let url = self.baseUrl.appendingPathComponent(endPoint)
+        
+        self.asyncRaw(method: .delete,
+                          url: url,
+                      headers: headers,
+                         body: nil,
+                   completion: completion)
+        }
+    func putRaw(_ endPoint: String, headers: HttpHeaders=[:],
+             _ dict: [String:Any], completion: @escaping (AsyncRawResponse)->Void) {
+        let url = self.baseUrl.appendingPathComponent(endPoint)
+        
+        self.asyncRaw(method: .put,
+                          url: url,
+                      headers: headers,
+                         body: dict,
+                   completion: completion)
+        }
+    func postRaw(_ endPoint: String, headers: HttpHeaders=[:],
+              _ dict: [String:Any], completion: @escaping (AsyncRawResponse)->Void) {
+        let url = self.baseUrl.appendingPathComponent(endPoint)
+        
+        self.asyncRaw(method: .post,
+                          url: url,
+                      headers: headers,
+                         body: dict,
+                   completion: completion)
+        }
+}
+
+// MARK: - Asynchronous Keyed Methods
 public extension SampleHTTPClient {
     func get(_ endPoint: String, headers: HttpHeaders=[:],
              completion: @escaping (AsyncKeyedResponse)->Void) {

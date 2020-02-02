@@ -88,7 +88,35 @@ public class SampleHTTPClient: NSObject {
         return (response, data)
     }
     
-    /// Make a synchronous HTTP call
+    
+    /// Make a synchronous HTTP call and return the resulting data
+    /// - Parameters:
+    ///   - url: URL to connect to
+    ///   - headers: Optional header fields to include
+    ///   - body: JSON data to send
+    ///   - timeout: Optional timeout
+    public func syncData(method: HTTPMethod,
+                     url: URL,
+                     headers: HttpHeaders=[:],
+                     body: KeyedData? = nil,
+                     timeout: TimeInterval = SampleHTTPClient.defaultTimeout) throws -> (HTTPURLResponse, Data) {
+        var req = URLRequest(url: url)
+        req.httpMethod = method.description
+        
+        // Setup HTTP Headers
+        req.addHTTPHeaders(headers: self.defaultHeaders, headers)
+        
+        // Setup body of HTTP message
+        if let body = body {
+            try req.setJSONBody(keyedData: body)
+        }
+        
+        // Perform the HTTP request
+        return try self.sync(request: req, timeout: timeout)
+    }
+
+    
+    /// Make a synchronous HTTP call decoding the data as keyedData
     /// - Parameters:
     ///   - url: URL to connect to
     ///   - headers: Optional header fields to include
@@ -96,40 +124,21 @@ public class SampleHTTPClient: NSObject {
     ///   - timeout: Optional timeout
     public func sync(method: HTTPMethod,
                      url: URL,
-                     headers: [String:String]=[:],
-                     body: [String:Any]? = nil,
-                     timeout: TimeInterval = SampleHTTPClient.defaultTimeout) throws -> (HTTPURLResponse, [String:Any]) {
-        var req = URLRequest(url: url)
-        req.httpMethod = method.description
-        
-        // Setup HTTP Headers
-        for (key,value) in self.defaultHeaders {
-            req.addValue(value, forHTTPHeaderField: key)
-        }
-        for (key,value) in headers {
-            req.addValue(value, forHTTPHeaderField: key)
-        }
-        
-        // Setup body of HTTP message
-        // Pretty printing for debug.  (Should be removed in production for performance)
-        if let body = body {
-            let jsonData = try JSONSerialization.data(withJSONObject: body,
-                                                  options: .prettyPrinted)
-            req.httpBody = jsonData
-        }
-        
-        // Perform the HTTP request
-        let (response, data) =
-            try self.sync(request: req, timeout: timeout)
+                     headers: HttpHeaders=[:],
+                     body: KeyedData? = nil,
+                     timeout: TimeInterval = SampleHTTPClient.defaultTimeout) throws -> (HTTPURLResponse, KeyedData) {
+        let (response, data) = try self.syncData(method: method,
+                                              url: url,
+                                              headers: headers,
+                                              body: body,
+                                              timeout: timeout
+                                              )
         
         // Convert the data to an object
-        let returnData = try JSONSerialization.jsonObject(with: data,
-                                                      options: [])
-        guard let returnDict = returnData as? [String : Any] else {
-            throw Failures.cannotDecodeData
-        }
+        let returnDict = try data.asKeyedData()
         return (response, returnDict)
     }
+    
 }
 
 extension SampleHTTPClient: URLSessionTaskDelegate {
