@@ -17,6 +17,16 @@ public extension SampleHTTPClient {
         case noBearerToken
         case userAlreadyExists
         case cannotCreateUser
+        
+        public var errorDescription: String? {
+            switch self {
+            case .invalidCredentials: return "Invalid login credentials"
+            case .unknownLoginFailure: return "Unknown login failure"
+            case .noBearerToken: return "No Bearer token, not logged in"
+            case .userAlreadyExists: return "User already exists"
+            case .cannotCreateUser: return "Cannot create user"
+            }
+        }
     }
     
     // MARK: - Sync functions

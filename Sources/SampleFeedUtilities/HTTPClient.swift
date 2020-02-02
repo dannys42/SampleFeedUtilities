@@ -18,11 +18,20 @@ public class SampleHTTPClient: NSObject {
     public var defaultHeaders: HttpHeaders = [:]
     public var defaultTimeout: TimeInterval = SampleHTTPClient.defaultTimeout
 
-    public enum Failures: Error {
+    public enum Failures: LocalizedError {
         case timeout
         case noHTTPResponse
         case noData
         case cannotDecodeData
+        
+        public var errorDescription: String? {
+            switch self {
+            case .timeout: return "timeout"
+            case .noHTTPResponse: return "No HTTP Response"
+            case .noData: return "No data from server"
+            case .cannotDecodeData: return "Cannot decode data from server"
+            }
+        }
     }
     
     public enum HTTPMethod: CustomStringConvertible {
