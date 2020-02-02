@@ -47,13 +47,13 @@ public extension SampleHTTPClient {
     /// - Parameters:
     ///   - url: URL to connect to
     ///   - headers: Optional header fields to include
-    ///   - body: JSON data to send
+    ///   - body: data to send
     ///   - timeout: Optional timeout
     @discardableResult
     func asyncRaw(method: HTTPMethod,
                      url: URL,
                      headers: HttpHeaders=[:],
-                     body: KeyedData? = nil,
+                     body: Data? = nil,
                      completion: @escaping (AsyncRawResponse)->Void) -> URLSessionDataTask? {
         
         var req = URLRequest(url: url)
@@ -63,14 +63,7 @@ public extension SampleHTTPClient {
         req.addHTTPHeaders(headers: self.defaultHeaders, headers)
 
         // Setup body of HTTP message
-        if let body = body {
-            do {
-                try req.setJSONBody(keyedData: body)
-            } catch {
-                completion(.failure(error))
-                return nil
-            }
-        }
+        req.httpBody = body
 
         // Perform the HTTP request
         let task = self.async(request: req) { (response) in
@@ -97,10 +90,21 @@ public extension SampleHTTPClient {
                      body: KeyedData? = nil,
                      completion: @escaping (AsyncKeyedResponse)->Void) -> URLSessionDataTask? {
         
+        var bodyData: Data?
+        do {
+            // Pretty printing for debug.  (Should be removed in production for performance)
+            let jsonData = try JSONSerialization.data(withJSONObject: body as Any,
+                                                  options: .prettyPrinted)
+            bodyData = jsonData
+        } catch {
+            completion(.failure(error))
+            return nil
+        }
+
         let task = asyncRaw(method: method,
                          url: url,
                          headers: headers,
-                         body: body) { rawResponse in
+                         body: bodyData) { rawResponse in
                             switch rawResponse {
                             case .failure(let error):
                                 completion( .failure(error) )

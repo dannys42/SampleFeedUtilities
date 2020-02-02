@@ -30,10 +30,10 @@ public extension SampleHTTPClient {
     }
     
     // MARK: - Sync functions
-    func createUser(username: String, password: String, email: String) throws {
+    func createUser(username: String, password: String, displayName: String) throws {
         let userInfo = [
-            "name" : username,
-            "email" : email,
+            "name" : displayName,
+            "email" : username,
             "password" : password
         ]
         let (resp,_) = try self.post("/users", userInfo)

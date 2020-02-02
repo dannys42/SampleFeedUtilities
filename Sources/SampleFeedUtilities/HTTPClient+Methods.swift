@@ -72,23 +72,23 @@ public extension SampleHTTPClient {
                    completion: completion)
         }
     func putRaw(_ endPoint: String, headers: HttpHeaders=[:],
-             _ dict: [String:Any], completion: @escaping (AsyncRawResponse)->Void) {
+             _ body: Data?, completion: @escaping (AsyncRawResponse)->Void) {
         let url = self.baseUrl.appendingPathComponent(endPoint)
         
         self.asyncRaw(method: .put,
                           url: url,
                       headers: headers,
-                         body: dict,
+                         body: body,
                    completion: completion)
         }
     func postRaw(_ endPoint: String, headers: HttpHeaders=[:],
-              _ dict: [String:Any], completion: @escaping (AsyncRawResponse)->Void) {
+              _ body: Data?, completion: @escaping (AsyncRawResponse)->Void) {
         let url = self.baseUrl.appendingPathComponent(endPoint)
         
         self.asyncRaw(method: .post,
                           url: url,
                       headers: headers,
-                         body: dict,
+                         body: body,
                    completion: completion)
         }
 }
