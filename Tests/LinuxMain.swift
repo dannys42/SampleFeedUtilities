@@ -1,7 +1,7 @@
 import XCTest
 
-import SampleUtilitiesTests
+import SampleFeedUtilitiesTests
 
 var tests = [XCTestCaseEntry]()
-tests += .SampleUtilitiesTestsallTests()
+tests += .SampleFeedUtilitiesTestsallTests()
 XCTMain(tests)
