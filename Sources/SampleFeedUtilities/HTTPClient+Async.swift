@@ -8,14 +8,8 @@
 import Foundation
 
 public extension SampleHTTPClient {
-    enum AsyncRawResponse {
-        case success(HTTPURLResponse, Data)
-        case failure(Error)
-    }
-    enum AsyncKeyedResponse {
-        case success(HTTPURLResponse, KeyedData)
-        case failure(Error)
-    }
+    typealias AsyncRawResponse = Result<(HTTPURLResponse,Data), Error>
+    typealias AsyncKeyedResponse = Result<(HTTPURLResponse, KeyedData), Error>
     
     /// Make an asynchronous HTTP call with Data input/output types
     /// - Parameters:
@@ -37,7 +31,7 @@ public extension SampleHTTPClient {
                 return
             }
             
-            completion(.success(response, data))
+            completion(.success((response, data)))
         }
         task.resume()
         return task
@@ -71,7 +65,7 @@ public extension SampleHTTPClient {
             case .failure(let error):
                 completion(.failure(error))
             case .success(let httpResponse, let data):
-                completion(.success(httpResponse, data))
+                completion(.success((httpResponse, data)))
             }
         }
         return task
@@ -112,7 +106,7 @@ public extension SampleHTTPClient {
                                 // Convert the data to an object
                                 do {
                                     let returnDict = try data.asKeyedData()
-                                    completion(.success(httpResponse, returnDict))
+                                    completion(.success((httpResponse, returnDict)))
                                 } catch {
                                     completion(.failure(error))
                                     return

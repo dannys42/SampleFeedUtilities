@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - Synchronous Methods
 public extension SampleHTTPClient {
-    func get(_ endPoint: String, headers: HttpHeaders=[:]) throws -> (HTTPURLResponse, [String:Any]) {
+    func get(_ endPoint: String, headers: HttpHeaders=[:]) throws -> (HTTPURLResponse, KeyedData) {
         let url = self.baseUrl.appendingPathComponent(endPoint)
         
         return try self.sync(method: .get,
@@ -18,7 +18,7 @@ public extension SampleHTTPClient {
                                body: nil,
                             timeout: self.defaultTimeout)
         }
-    func delete(_ endPoint: String, headers: HttpHeaders=[:]) throws -> (HTTPURLResponse, [String:Any]) {
+    func delete(_ endPoint: String, headers: HttpHeaders=[:]) throws -> (HTTPURLResponse, KeyedData) {
         let url = self.baseUrl.appendingPathComponent(endPoint)
         
         return try self.sync(method: .delete,
@@ -28,7 +28,7 @@ public extension SampleHTTPClient {
                             timeout: self.defaultTimeout)
         }
     func put(_ endPoint: String, headers: HttpHeaders=[:],
-             _ dict: [String:Any]) throws -> (HTTPURLResponse, [String:Any]) {
+             _ dict: KeyedData) throws -> (HTTPURLResponse, KeyedData) {
         let url = self.baseUrl.appendingPathComponent(endPoint)
         
         return try self.sync(method: .put,
@@ -38,7 +38,7 @@ public extension SampleHTTPClient {
                             timeout: self.defaultTimeout)
         }
     func post(_ endPoint: String, headers: HttpHeaders=[:],
-              _ dict: [String:Any]) throws -> (HTTPURLResponse, [String:Any]) {
+              _ dict: KeyedData) throws -> (HTTPURLResponse, KeyedData) {
         let url = self.baseUrl.appendingPathComponent(endPoint)
         
         return try self.sync(method: .post,
