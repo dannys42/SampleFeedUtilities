@@ -82,6 +82,38 @@ public extension SampleHTTPClient {
     
     
     // MARK: - Async functions
+    
+    /// Asynchronously create a user
+    /// - Parameters:
+    ///   - username: username to create with
+    ///   - password: password of user
+    ///   - displayName: Public display name of user
+    ///   - completion: completion handler when operation is complete.  Returns user info from server upon success.
+    func createUser(username: String, password: String, displayName: String, completion: @escaping (Result<KeyedData,Error>)->Void) {
+        
+        let userInfo = [
+            "name" : displayName,
+            "email" : username,
+            "password" : password
+        ]
+        self.post("/users", userInfo) { response in
+            switch response {
+            case .success(let httpResponse, let keyedData):
+                switch httpResponse.statusCode {
+                case 409:
+                    completion(.failure(LoginFailures.userAlreadyExists))
+                case 200: // success
+                    completion(.success(keyedData))
+                default:
+                    completion(.failure(LoginFailures.cannotCreateUser))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+
     func login(username: String, password: String, completion: @escaping (Error?)->Void) {
         let reqTokenPlain = "\(username):\(password)"
         let reqTokenBase64 = reqTokenPlain.data(using: .utf8)?.base64EncodedString() ?? ""
